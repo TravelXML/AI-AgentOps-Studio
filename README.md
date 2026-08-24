@@ -4,9 +4,7 @@
 observe, and optimize multi-agent systems - with a real execution engine, a real flight recorder,
 and a real database underneath the canvas, not just a drag-and-drop demo.
 
-> Working name: **AgentQ**. See [`promots.md`](promots.md) for the full product spec this
-> repository implements, and [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) for current build
-> status phase by phase.
+
 
 ## Why AgentQ
 
