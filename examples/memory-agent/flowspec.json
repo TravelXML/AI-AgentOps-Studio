@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "memory-agent",
+  "name": "Conversation Memory",
+  "version": 1,
+  "description": "Input -> Memory -> Agent -> Output. Every run appends your message to a stored transcript (scoped to this Memory node) and hands the whole conversation-so-far to the agent. Run it two or three times with different messages to see it remember.",
+  "inputs": [
+    {
+      "name": "message",
+      "type": "string",
+      "required": true,
+      "description": "Your message to the assistant"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 80, "y": 160 }, "config": {} },
+    {
+      "id": "memory-1",
+      "type": "memory",
+      "label": "Conversation",
+      "position": { "x": 360, "y": 160 },
+      "config": { "memory_type": "conversation", "scope": "agent", "ttl_seconds": null }
+    },
+    {
+      "id": "agent-1",
+      "type": "agent",
+      "label": "Assistant",
+      "position": { "x": 640, "y": 160 },
+      "config": {
+        "name": "Assistant",
+        "description": "Remembers the conversation so far.",
+        "instructions": "You are a helpful assistant. You're given the conversation so far, formatted as 'role: content' lines. Reply to the latest message, staying consistent with earlier turns.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 512
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 920, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "memory-1" },
+    { "id": "e2", "source": "memory-1", "target": "agent-1" },
+    { "id": "e3", "source": "agent-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "node_type_demo": "memory" }
+}

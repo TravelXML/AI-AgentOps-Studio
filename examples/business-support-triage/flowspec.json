@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "id": "business-support-triage",
+  "name": "Support Ticket Triage",
+  "version": 1,
+  "description": "Input -> Guardrail -> Router -> one of 4 specialist agents -> Output. A real 4-way ticket router: screens for PII/abuse first, then reads the message and hands it to whichever specialist team actually fits - billing, technical, account, or general.",
+  "inputs": [
+    {
+      "name": "message",
+      "type": "string",
+      "required": true,
+      "description": "The customer's support message, as typed"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 40, "y": 260 }, "config": {} },
+    {
+      "id": "guardrail-1",
+      "type": "guardrail",
+      "label": "Safety Check",
+      "position": { "x": 300, "y": 260 },
+      "config": {
+        "stage": "pre",
+        "checks": [
+          { "type": "pii_detection", "config": {} },
+          { "type": "blocked_keywords", "config": { "keywords": ["kill you", "lawsuit threat"] } }
+        ],
+        "on_fail": "block"
+      }
+    },
+    {
+      "id": "router-1",
+      "type": "router",
+      "label": "Triage",
+      "position": { "x": 580, "y": 260 },
+      "config": {
+        "mode": "llm",
+        "llm_instructions": "Read the customer's message and choose which specialist team should handle it: Billing Specialist (payments, invoices, charges, refunds), Technical Specialist (bugs, errors, the product not working), Account Specialist (login, password, profile, subscription), or General Support (anything else).",
+        "rules": [
+          { "when": "true", "target": "billing-agent" },
+          { "when": "true", "target": "technical-agent" },
+          { "when": "true", "target": "account-agent" }
+        ],
+        "default_target": "general-agent",
+        "model": "default"
+      }
+    },
+    {
+      "id": "billing-agent",
+      "type": "agent",
+      "label": "Billing Specialist",
+      "position": { "x": 900, "y": 40 },
+      "config": {
+        "name": "Billing Specialist",
+        "description": "Handles invoices, charges, payment methods, and refund requests.",
+        "instructions": "You are a billing support specialist. Be precise about amounts, dates, and policy. For refund requests, explain that refunds are processed within 5-7 business days and ask for the order number if it wasn't provided.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 512
+      }
+    },
+    {
+      "id": "technical-agent",
+      "type": "agent",
+      "label": "Technical Specialist",
+      "position": { "x": 900, "y": 200 },
+      "config": {
+        "name": "Technical Specialist",
+        "description": "Troubleshoots bugs, errors, and product issues.",
+        "instructions": "You are a technical support specialist. Ask clarifying questions (device, browser, steps to reproduce) before suggesting a fix, and keep instructions concrete and numbered.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 512
+      }
+    },
+    {
+      "id": "account-agent",
+      "type": "agent",
+      "label": "Account Specialist",
+      "position": { "x": 900, "y": 360 },
+      "config": {
+        "name": "Account Specialist",
+        "description": "Handles login, password, profile, and subscription questions.",
+        "instructions": "You are an account support specialist. Never ask the customer for their current password. Guide them through the official password-reset flow for anything credential-related.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 512
+      }
+    },
+    {
+      "id": "general-agent",
+      "type": "agent",
+      "label": "General Support",
+      "position": { "x": 900, "y": 520 },
+      "config": {
+        "name": "General Support",
+        "description": "Handles anything that isn't clearly billing, technical, or account-related.",
+        "instructions": "You are a friendly, general customer support agent. If the question is really about billing, a bug, or an account, say so and suggest they mention that explicitly so it routes correctly next time.",
+        "model": "default",
+        "temperature": 0.3,
+        "max_tokens": 512
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 1220, "y": 260 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "guardrail-1" },
+    { "id": "e2", "source": "guardrail-1", "target": "router-1" },
+    { "id": "e3", "source": "router-1", "target": "billing-agent" },
+    { "id": "e4", "source": "router-1", "target": "technical-agent" },
+    { "id": "e5", "source": "router-1", "target": "account-agent" },
+    { "id": "e6", "source": "router-1", "target": "general-agent" },
+    { "id": "e7", "source": "billing-agent", "target": "output-1" },
+    { "id": "e8", "source": "technical-agent", "target": "output-1" },
+    { "id": "e9", "source": "account-agent", "target": "output-1" },
+    { "id": "e10", "source": "general-agent", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "template_pack": "customer-support" }
+}

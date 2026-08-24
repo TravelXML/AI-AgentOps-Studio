@@ -1,0 +1,115 @@
+name: agentq
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: agentq
+      POSTGRES_PASSWORD: agentq
+      POSTGRES_DB: agentq
+    ports:
+      - "5432:5432"
+    volumes:
+      - agentq-postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentq"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    environment:
+      APP_ENV: development
+      APP_SECRET: ${APP_SECRET:-dev-insecure-secret-change-me}
+      DATABASE_URL: postgresql+asyncpg://agentq:agentq@postgres:5432/agentq
+      REDIS_URL: redis://redis:6379/0
+      DEFAULT_MODEL_PROVIDER: ${DEFAULT_MODEL_PROVIDER:-mock}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      CORS_ORIGINS: '["http://localhost:3000", "http://127.0.0.1:3000"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.web
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # A real (tiny) MCP server with two demo tools (echo, add) — lets the MCP example flow work
+  # out of the box, with nothing to configure. Reuses the api image; see
+  # infrastructure/scripts/demo_mcp_server.py. Not something a real deployment needs.
+  demo-mcp:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    command: ["python", "infrastructure/scripts/demo_mcp_server.py"]
+    environment:
+      PORT: "8100"
+    ports:
+      - "8100:8100"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "-X",
+          "POST",
+          "-H",
+          "Content-Type: application/json",
+          "-d",
+          '{"jsonrpc":"2.0","id":1,"method":"tools/list"}',
+          "http://localhost:8100/mcp",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # Optional local model runtime — enable with `docker compose --profile ollama up`.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - agentq-ollama-data:/root/.ollama
+
+volumes:
+  agentq-postgres-data:
+  agentq-ollama-data:

@@ -1,0 +1,29 @@
+[project]
+name = "agentq-runtime"
+version = "0.1.0"
+description = "WorkflowRuntime abstraction + LangGraph adapter (FlowSpec -> executable graph)"
+requires-python = ">=3.12"
+dependencies = [
+    "agentq-flowspec",
+    "agentq-model-gateway",
+    "agentq-observability",
+    "agentq-security",
+    "langgraph>=0.2",
+    "langchain-core>=0.3",
+    "langgraph-checkpoint-postgres>=2.0",
+    "psycopg[binary]>=3.2",
+    "httpx>=0.27",
+]
+
+[tool.uv.sources]
+agentq-flowspec = { workspace = true }
+agentq-model-gateway = { workspace = true }
+agentq-observability = { workspace = true }
+agentq-security = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentq_runtime"]

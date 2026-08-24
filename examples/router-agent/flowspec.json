@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "router-agent",
+  "name": "Customer Support Router",
+  "version": 1,
+  "description": "Routes billing questions to a Billing Agent and everything else to a Support Agent.",
+  "inputs": [
+    { "name": "intent", "type": "string", "required": true, "description": "billing | support | other" },
+    { "name": "message", "type": "string", "required": true }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 60, "y": 220 }, "config": {} },
+    {
+      "id": "router-1",
+      "type": "router",
+      "label": "Router",
+      "position": { "x": 340, "y": 220 },
+      "config": {
+        "mode": "rule",
+        "rules": [{ "when": "input.intent == 'billing'", "target": "billing-agent" }],
+        "default_target": "support-agent"
+      }
+    },
+    {
+      "id": "billing-agent",
+      "type": "agent",
+      "label": "Billing Agent",
+      "position": { "x": 640, "y": 100 },
+      "config": {
+        "name": "Billing Agent",
+        "description": "Handles invoices, refunds, and payment questions.",
+        "instructions": "You are a billing support specialist. Be precise about amounts and policies.",
+        "model": "default"
+      }
+    },
+    {
+      "id": "support-agent",
+      "type": "agent",
+      "label": "Support Agent",
+      "position": { "x": 640, "y": 340 },
+      "config": {
+        "name": "Support Agent",
+        "description": "Handles general product and technical support questions.",
+        "instructions": "You are a friendly technical support agent.",
+        "model": "default"
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 940, "y": 220 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "router-1" },
+    { "id": "e2", "source": "router-1", "target": "billing-agent" },
+    { "id": "e3", "source": "router-1", "target": "support-agent" },
+    { "id": "e4", "source": "billing-agent", "target": "output-1" },
+    { "id": "e5", "source": "support-agent", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true }
+}

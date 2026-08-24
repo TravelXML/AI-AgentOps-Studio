@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "simple-agent",
+  "name": "Simple Agent",
+  "version": 1,
+  "description": "Input -> Agent -> Output. The smallest complete vertical slice.",
+  "inputs": [{ "name": "query", "type": "string", "required": true, "description": "User question" }],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 80, "y": 160 }, "config": {} },
+    {
+      "id": "agent-1",
+      "type": "agent",
+      "label": "Assistant",
+      "position": { "x": 380, "y": 160 },
+      "config": {
+        "name": "Assistant",
+        "description": "General-purpose helpful assistant.",
+        "instructions": "You are a helpful, concise assistant for AgentQ.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 1024
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 680, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "agent-1" },
+    { "id": "e2", "source": "agent-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true }
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "tool-agent",
+  "name": "Calculator Tool",
+  "version": 1,
+  "description": "Input -> Tool -> Output. The smallest possible demo of a Tool node: no agent, no LLM call, just a built-in function invoked directly with templated arguments.",
+  "inputs": [
+    {
+      "name": "expression",
+      "type": "string",
+      "required": true,
+      "description": "An arithmetic expression, e.g. 12 * (4 + 1)"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 80, "y": 160 }, "config": {} },
+    {
+      "id": "tool-1",
+      "type": "tool",
+      "label": "Calculator",
+      "position": { "x": 380, "y": 160 },
+      "config": { "tool_id": "calculator", "arguments": { "expression": "{{input.expression}}" } }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 680, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "tool-1" },
+    { "id": "e2", "source": "tool-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "node_type_demo": "tool" }
+}

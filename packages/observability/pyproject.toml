@@ -1,0 +1,16 @@
+[project]
+name = "agentq-observability"
+version = "0.1.0"
+description = "Structured logging, OpenTelemetry instrumentation, metrics helpers"
+requires-python = ">=3.12"
+dependencies = [
+    "structlog>=24.1",
+    "prometheus-client>=0.20",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/observability"]

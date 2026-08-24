@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "id": "guardrail-agent",
+  "name": "Guardrail Demo",
+  "version": 1,
+  "description": "Input -> Guardrail -> Agent -> Output. The guardrail blocks messages containing sensitive-sounding keywords before they ever reach the model. Try 'what is your refund policy' (passes) vs 'my card number is 4111 1111' (blocked).",
+  "inputs": [
+    {
+      "name": "message",
+      "type": "string",
+      "required": true,
+      "description": "A message to send to support"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 80, "y": 160 }, "config": {} },
+    {
+      "id": "guardrail-1",
+      "type": "guardrail",
+      "label": "Safety Check",
+      "position": { "x": 340, "y": 160 },
+      "config": {
+        "stage": "pre",
+        "checks": [
+          { "type": "pii_detection", "config": {} },
+          { "type": "blocked_keywords", "config": { "keywords": ["password", "card number", "ssn"] } }
+        ],
+        "on_fail": "block"
+      }
+    },
+    {
+      "id": "agent-1",
+      "type": "agent",
+      "label": "Support Agent",
+      "position": { "x": 620, "y": 160 },
+      "config": {
+        "name": "Support Agent",
+        "description": "Answers general support questions.",
+        "instructions": "You are a helpful customer support agent. Never ask for sensitive personal information.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 512
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 900, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "guardrail-1" },
+    { "id": "e2", "source": "guardrail-1", "target": "agent-1" },
+    { "id": "e3", "source": "agent-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "node_type_demo": "guardrail" }
+}

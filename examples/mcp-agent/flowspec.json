@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "id": "mcp-agent",
+  "name": "MCP Tool Call",
+  "version": 1,
+  "description": "Input -> MCP -> Output. Calls the 'echo' tool on a registered MCP server over a real JSON-RPC connection. Seeded automatically if the included demo MCP server is reachable (see infrastructure/scripts/demo_mcp_server.py, or the demo-mcp service in docker-compose.yml).",
+  "inputs": [
+    {
+      "name": "text",
+      "type": "string",
+      "required": true,
+      "description": "Text to send through the MCP server's echo tool"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 80, "y": 160 }, "config": {} },
+    {
+      "id": "mcp-1",
+      "type": "mcp",
+      "label": "Echo",
+      "position": { "x": 380, "y": 160 },
+      "config": {
+        "server_id": "__SEEDED_MCP_SERVER_ID__",
+        "tool_name": "echo",
+        "arguments": { "text": "{{input.text}}" }
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 680, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "mcp-1" },
+    { "id": "e2", "source": "mcp-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "node_type_demo": "mcp" }
+}

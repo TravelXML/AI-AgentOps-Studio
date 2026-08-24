@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "id": "supervisor-agent",
+  "name": "Supervisor Multi-Agent",
+  "version": 1,
+  "description": "A Supervisor delegates to a Researcher or a Writer depending on the request.",
+  "inputs": [{ "name": "query", "type": "string", "required": true }],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 60, "y": 220 }, "config": {} },
+    {
+      "id": "supervisor-1",
+      "type": "supervisor",
+      "label": "Supervisor",
+      "position": { "x": 340, "y": 220 },
+      "config": {
+        "agents": ["research-agent", "writer-agent"],
+        "routing_instructions": "Choose Research for fact-finding requests and Writer for drafting/writing requests.",
+        "max_iterations": 6,
+        "model": "default"
+      }
+    },
+    {
+      "id": "research-agent",
+      "type": "agent",
+      "label": "Researcher",
+      "position": { "x": 640, "y": 100 },
+      "config": {
+        "name": "Researcher",
+        "description": "Finds facts and research data.",
+        "instructions": "You are a meticulous researcher. Cite what you know and flag uncertainty.",
+        "model": "default"
+      }
+    },
+    {
+      "id": "writer-agent",
+      "type": "agent",
+      "label": "Writer",
+      "position": { "x": 640, "y": 340 },
+      "config": {
+        "name": "Writer",
+        "description": "Writes clear, well-structured prose and articles.",
+        "instructions": "You are a skilled writer. Produce clear, well-organized prose.",
+        "model": "default"
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 940, "y": 220 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "supervisor-1" },
+    { "id": "e2", "source": "supervisor-1", "target": "research-agent" },
+    { "id": "e3", "source": "supervisor-1", "target": "writer-agent" },
+    { "id": "e4", "source": "research-agent", "target": "output-1" },
+    { "id": "e5", "source": "writer-agent", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true }
+}

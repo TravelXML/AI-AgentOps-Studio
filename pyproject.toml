@@ -1,0 +1,48 @@
+[project]
+name = "agentq-workspace"
+version = "0.1.0"
+description = "AgentQ — Enterprise Agent Engineering Platform (workspace root)"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+  "packages/flowspec",
+  "packages/runtime",
+  "packages/model_gateway",
+  "packages/evaluation",
+  "packages/security",
+  "packages/observability",
+  "packages/sdk",
+  "apps/api",
+]
+
+[tool.uv.sources]
+agentq-flowspec = { workspace = true }
+agentq-runtime = { workspace = true }
+agentq-model-gateway = { workspace = true }
+agentq-evaluation = { workspace = true }
+agentq-security = { workspace = true }
+agentq-observability = { workspace = true }
+agentq-sdk = { workspace = true }
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["apps/api/src", "packages/flowspec/src", "packages/runtime/src", "packages/model_gateway/src", "packages/evaluation/src", "packages/security/src", "packages/observability/src", "packages/sdk/src"]
+extend-exclude = ["promots.md", "prompt", "alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    "B008",  # FastAPI's `Depends(...)` default-argument idiom is intentional, not a bug
+]
+
+[tool.ruff.lint.per-file-ignores]
+"apps/api/alembic/versions/*.py" = ["E501"]  # auto-generated migration files
+
+[tool.pytest.ini_options]
+testpaths = ["apps/api/tests", "packages", "tests/integration"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"

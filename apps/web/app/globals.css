@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-canvas: 246 247 249;
+  --color-surface: 255 255 255;
+  --color-surface-raised: 255 255 255;
+  --color-border: 226 229 233;
+  --color-border-strong: 203 209 217;
+  --color-ink: 23 27 33;
+  --color-ink-muted: 96 105 117;
+  --color-ink-faint: 148 156 166;
+  --color-accent: 109 40 217;
+  --color-accent-hover: 91 33 182;
+  --color-accent-ink: 255 255 255;
+  --color-success: 22 137 92;
+  --color-warning: 180 105 12;
+  --color-danger: 203 48 55;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+.dark {
+  --color-canvas: 15 17 21;
+  --color-surface: 21 24 29;
+  --color-surface-raised: 27 31 37;
+  --color-border: 40 45 53;
+  --color-border-strong: 58 65 76;
+  --color-ink: 231 234 238;
+  --color-ink-muted: 158 166 176;
+  --color-ink-faint: 108 116 128;
+  --color-accent: 167 139 250;
+  --color-accent-hover: 196 181 253;
+  --color-accent-ink: 12 16 26;
+  --color-success: 62 191 138;
+  --color-warning: 224 158 60;
+  --color-danger: 235 99 105;
+}
+
+* {
+  border-color: rgb(var(--color-border));
+}
+
+html,
+body {
+  background-color: rgb(var(--color-canvas));
+  color: rgb(var(--color-ink));
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: rgb(var(--color-accent) / 0.25);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--color-border-strong));
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

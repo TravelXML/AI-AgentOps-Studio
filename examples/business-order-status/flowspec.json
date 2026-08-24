@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "id": "business-order-status",
+  "name": "Order Status Lookup",
+  "version": 1,
+  "description": "Input -> MCP (lookup_order) -> Agent -> Output. Looks up a real order record via a tool call, then writes a friendly, on-brand reply from the raw data - the pattern behind 'where's my order' self-service, whatever your actual order system is behind the MCP server.",
+  "inputs": [
+    {
+      "name": "order_id",
+      "type": "string",
+      "required": true,
+      "description": "An order id, e.g. ORD-1042"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 60, "y": 160 }, "config": {} },
+    {
+      "id": "mcp-1",
+      "type": "mcp",
+      "label": "Lookup Order",
+      "position": { "x": 340, "y": 160 },
+      "config": {
+        "server_id": "__SEEDED_MCP_SERVER_ID__",
+        "tool_name": "lookup_order",
+        "arguments": { "order_id": "{{input.order_id}}" }
+      }
+    },
+    {
+      "id": "agent-1",
+      "type": "agent",
+      "label": "Reply Writer",
+      "position": { "x": 640, "y": 160 },
+      "config": {
+        "name": "Reply Writer",
+        "description": "Turns raw order data into a friendly customer-facing reply.",
+        "instructions": "You're given order data as JSON above. Write a short, friendly status update using only that data - item, status, and (if not yet delivered) that it's on its way. Never invent details not present in the JSON.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 300
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 940, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "mcp-1" },
+    { "id": "e2", "source": "mcp-1", "target": "agent-1" },
+    { "id": "e3", "source": "agent-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "template_pack": "customer-support" }
+}

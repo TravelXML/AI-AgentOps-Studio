@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "id": "human-approval-agent",
+  "name": "Refund Approval",
+  "version": 1,
+  "description": "Refund Agent drafts a decision; refunds pause for human approval before completing.",
+  "inputs": [
+    { "name": "amount", "type": "number", "required": true },
+    { "name": "reason", "type": "string", "required": false }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 60, "y": 160 }, "config": {} },
+    {
+      "id": "agent-1",
+      "type": "agent",
+      "label": "Refund Agent",
+      "position": { "x": 340, "y": 160 },
+      "config": {
+        "name": "Refund Agent",
+        "description": "Drafts a refund decision summary for human review.",
+        "instructions": "Summarize the refund request and recommend approve or deny with a one-line reason.",
+        "model": "default"
+      }
+    },
+    {
+      "id": "approval-1",
+      "type": "human_approval",
+      "label": "Approval",
+      "position": { "x": 620, "y": 160 },
+      "config": {
+        "condition": "input.amount > 500",
+        "message_template": "Approve this refund?"
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 900, "y": 160 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "agent-1" },
+    { "id": "e2", "source": "agent-1", "target": "approval-1" },
+    { "id": "e3", "source": "approval-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true }
+}

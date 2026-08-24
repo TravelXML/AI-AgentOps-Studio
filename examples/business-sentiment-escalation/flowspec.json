@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "id": "business-sentiment-escalation",
+  "name": "Sentiment-Aware Escalation",
+  "version": 1,
+  "description": "Input -> Router -> either a Human Approval hand-off (urgent/frustrated messages) or an AI Support Agent (calm, routine ones) -> Output. Escalation triggers on an explicit, auditable phrase list rather than an opaque model judgment call - the kind of thing you can actually explain when someone asks why a message escalated.",
+  "inputs": [
+    {
+      "name": "message",
+      "type": "string",
+      "required": true,
+      "description": "The customer's message"
+    }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 60, "y": 200 }, "config": {} },
+    {
+      "id": "router-1",
+      "type": "router",
+      "label": "Urgency Check",
+      "position": { "x": 340, "y": 200 },
+      "config": {
+        "mode": "rule",
+        "rules": [
+          {
+            "when": "'urgent' in input.message or 'furious' in input.message or 'unacceptable' in input.message or 'immediately' in input.message or 'angry' in input.message or 'terrible' in input.message or 'awful' in input.message or 'demand' in input.message or 'lawyer' in input.message or 'worst' in input.message or 'ridiculous' in input.message",
+            "target": "escalate"
+          }
+        ],
+        "default_target": "ai-agent"
+      }
+    },
+    {
+      "id": "escalate",
+      "type": "human_approval",
+      "label": "Urgent Escalation",
+      "position": { "x": 640, "y": 80 },
+      "config": {
+        "message_template": "Flagged as urgent/frustrated - a human needs to take over this conversation: \"{{input.message}}\"",
+        "timeout_seconds": null
+      }
+    },
+    {
+      "id": "ai-agent",
+      "type": "agent",
+      "label": "AI Support Agent",
+      "position": { "x": 640, "y": 320 },
+      "config": {
+        "name": "AI Support Agent",
+        "description": "Handles calm, routine customer questions.",
+        "instructions": "You are a calm, helpful support agent handling a routine question. Answer directly and warmly.",
+        "model": "default",
+        "temperature": 0.3,
+        "max_tokens": 400
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 940, "y": 200 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "router-1" },
+    { "id": "e2", "source": "router-1", "target": "escalate" },
+    { "id": "e3", "source": "router-1", "target": "ai-agent" },
+    { "id": "e4", "source": "escalate", "target": "output-1" },
+    { "id": "e5", "source": "ai-agent", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "template_pack": "customer-support" }
+}

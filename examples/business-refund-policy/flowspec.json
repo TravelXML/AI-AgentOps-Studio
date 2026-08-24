@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "id": "business-refund-policy",
+  "name": "Refund Policy Engine",
+  "version": 1,
+  "description": "Input -> Human Approval (skipped under $100, required above it) -> MCP (process_refund) -> Agent -> Output. A real policy tier, not a blanket 'always ask a human' - small refunds process immediately, larger ones pause for a manager, then both paths actually process the refund and confirm it.",
+  "inputs": [
+    { "name": "order_id", "type": "string", "required": true, "description": "The order being refunded" },
+    { "name": "amount", "type": "number", "required": true, "description": "Refund amount in USD" },
+    { "name": "reason", "type": "string", "required": false, "description": "Why the customer wants a refund" }
+  ],
+  "nodes": [
+    { "id": "input-1", "type": "input", "label": "Input", "position": { "x": 40, "y": 200 }, "config": {} },
+    {
+      "id": "approval-1",
+      "type": "human_approval",
+      "label": "Policy Gate",
+      "position": { "x": 320, "y": 200 },
+      "config": {
+        "condition": "input.amount > 100",
+        "message_template": "Refund of ${{input.amount}} for order {{input.order_id}} exceeds the $100 auto-approval threshold - please review before it's processed.",
+        "timeout_seconds": null
+      }
+    },
+    {
+      "id": "mcp-1",
+      "type": "mcp",
+      "label": "Process Refund",
+      "position": { "x": 620, "y": 200 },
+      "config": {
+        "server_id": "__SEEDED_MCP_SERVER_ID__",
+        "tool_name": "process_refund",
+        "arguments": {
+          "order_id": "{{input.order_id}}",
+          "amount": "{{input.amount}}",
+          "reason": "{{input.reason}}"
+        }
+      }
+    },
+    {
+      "id": "agent-1",
+      "type": "agent",
+      "label": "Confirmation Writer",
+      "position": { "x": 920, "y": 200 },
+      "config": {
+        "name": "Confirmation Writer",
+        "description": "Writes a friendly refund confirmation from the processing result.",
+        "instructions": "You're given a refund confirmation as JSON above (refund_id, amount, status). Write a short, reassuring confirmation message to the customer including the refund id and amount, and that it'll appear on their statement within 5-7 business days.",
+        "model": "default",
+        "temperature": 0.2,
+        "max_tokens": 300
+      }
+    },
+    { "id": "output-1", "type": "output", "label": "Output", "position": { "x": 1220, "y": 200 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input-1", "target": "approval-1" },
+    { "id": "e2", "source": "approval-1", "target": "mcp-1" },
+    { "id": "e3", "source": "mcp-1", "target": "agent-1" },
+    { "id": "e4", "source": "agent-1", "target": "output-1" }
+  ],
+  "variables": {},
+  "policies": {},
+  "metadata": { "example": true, "template_pack": "customer-support" }
+}
